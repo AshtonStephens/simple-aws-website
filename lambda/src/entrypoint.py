@@ -149,7 +149,13 @@ def package_response(status_code: int, response_object):
     # Create the response object with headers.
     response = {
         'statusCode': status_code,
-        'headers': { "Content-Type": "application/json" },
+        'headers': {
+            'Content-Type': "application/json",
+            # Add CORS headers to response.
+            'Access-Control-Allow-Headers': "Content-Type",
+            'Access-Control-Allow-Origin': "*", # Allow all origins.
+            'Access-Control-Allow-Methods': "OPTIONS,POST,GET",
+        },
     }
 
     # Add the body to the response object if there is one.

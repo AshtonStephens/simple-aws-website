@@ -6,11 +6,18 @@ import json
 from unittest import TestCase, mock, main
 from src.entrypoint import EventHandler
 
+# Testing Constants
 TEST_TABLE_NAME = "TestTableName"
 TEST_UUID = "a4b90c1b-4b38-4fde-85de-601cbc3e54b8"
 TEST_UUID_FACTORY = lambda: TEST_UUID
 TEST_LAMBDA_CONTEXT = None
 TEST_MESSAGE = "This is a test message."
+EXPECTED_RESPONSE_HEADERS = {
+    'Content-Type': "application/json",
+    'Access-Control-Allow-Headers': "Content-Type",
+    'Access-Control-Allow-Origin': "*",
+    'Access-Control-Allow-Methods': "OPTIONS,POST,GET",
+}
 
 class EventHandlerTest(TestCase):
     """
@@ -38,7 +45,7 @@ class EventHandlerTest(TestCase):
         # Assert
         self.assertEqual(response, {
             'statusCode': 201,
-            'headers': { "Content-Type": "application/json" },
+            'headers': EXPECTED_RESPONSE_HEADERS,
             'body': json.dumps({
                 'id': TEST_UUID,
                 'message': TEST_MESSAGE,
@@ -75,7 +82,7 @@ class EventHandlerTest(TestCase):
         # Assert
         self.assertEqual(response, {
             'statusCode': 200,
-            'headers': { "Content-Type": "application/json" },
+            'headers': EXPECTED_RESPONSE_HEADERS,
             'body': json.dumps({
                 'message_count': test_message_count,
             })
@@ -112,7 +119,7 @@ class EventHandlerTest(TestCase):
         # Assert
         self.assertEqual(response, {
             'statusCode': 200,
-            'headers': { "Content-Type": "application/json" },
+            'headers': EXPECTED_RESPONSE_HEADERS,
             'body': json.dumps({
                 'id': TEST_UUID,
                 'message': TEST_MESSAGE,
@@ -145,7 +152,7 @@ class EventHandlerTest(TestCase):
         # Assert
         self.assertEqual(response, {
             'statusCode': 400,
-            'headers': { "Content-Type": "application/json" },
+            'headers': EXPECTED_RESPONSE_HEADERS,
             'body': json.dumps(
                 f'Unsupported API Call: Method {test_method}, Resource {test_resource}.'),
         })
