@@ -13,7 +13,16 @@ describe('CloudFormationStack', () => {
 
     // Assert
     template.hasResourceProperties('AWS::S3::Bucket', {
-        // TODO: Verify more properties once the bucket has greater specification.
+      PublicAccessBlockConfiguration: {
+        BlockPublicAcls: false,
+        BlockPublicPolicy: false,
+        IgnorePublicAcls: false,
+        RestrictPublicBuckets: false,
+      },
+      WebsiteConfiguration: {
+        ErrorDocument: "404.html",
+        IndexDocument: "index.html"
+      }
     });
   });
 
