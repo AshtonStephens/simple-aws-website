@@ -1,12 +1,22 @@
 import { Template } from 'aws-cdk-lib/assertions';
 import * as cdk from 'aws-cdk-lib';
 import { CloudFormationStack } from '../lib/cloud_formation-stack';
+import { CloudFormationStackProps } from '../lib/cloud_formation-stack-props';
+
+// Constant test values
+const TEST_STACK_PROPS: CloudFormationStackProps = {
+    stageName: "dummyStage",
+    env: {
+        account: "account",
+        region: "region",
+    },
+}
 
 describe('CloudFormationStack', () => {
     it('should create a S3 bucket', async () => {
         // Arrange
         const app = new cdk.App();
-        const stack = new CloudFormationStack(app, 'TestStack');
+        const stack = new CloudFormationStack(app, 'TestStack', TEST_STACK_PROPS);
 
         // Act
         const template = Template.fromStack(stack);
@@ -29,7 +39,7 @@ describe('CloudFormationStack', () => {
     it('should create a DynamoDB table', async () => {
         // Arrange
         const app = new cdk.App();
-        const stack = new CloudFormationStack(app, 'TestStack');
+        const stack = new CloudFormationStack(app, 'TestStack', TEST_STACK_PROPS);
 
         // Act
         const template = Template.fromStack(stack);
@@ -49,7 +59,7 @@ describe('CloudFormationStack', () => {
     it('should create a Lambda function', async () => {
         // Arrange
         const app = new cdk.App();
-        const stack = new CloudFormationStack(app, 'TestStack');
+        const stack = new CloudFormationStack(app, 'TestStack', TEST_STACK_PROPS);
 
         // Act
         const template = Template.fromStack(stack);
@@ -66,7 +76,7 @@ describe('CloudFormationStack', () => {
     it('should create a REST API', async () => {
         // Arrange
         const app = new cdk.App();
-        const stack = new CloudFormationStack(app, 'TestStack');
+        const stack = new CloudFormationStack(app, 'TestStack', TEST_STACK_PROPS);
 
         // Act
         const template = Template.fromStack(stack);
@@ -81,7 +91,7 @@ describe('CloudFormationStack', () => {
     it('should create an IAM User', async () => {
         // Arrange
         const app = new cdk.App();
-        const stack = new CloudFormationStack(app, 'TestStack');
+        const stack = new CloudFormationStack(app, 'TestStack', TEST_STACK_PROPS);
 
         // Act
         const template = Template.fromStack(stack);

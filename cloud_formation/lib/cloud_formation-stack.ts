@@ -9,6 +9,8 @@ import * as assets from 'aws-cdk-lib/aws-s3-assets';
 import * as apig from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import { CloudFormationStackProps } from './cloud_formation-stack-props';
+import { CloudFormationStackUtils } from './cloud_formation-stack-util';
 
 /**
 * @class CloudFormationStack
@@ -20,14 +22,14 @@ export class CloudFormationStack extends cdk.Stack {
     * @constructor
     * @param {Construct} scope The AWS CDK construct scope.
     * @param {string} id The stack ID.
-    * @param {cdk.StackProps} props The stack properties.
+    * @param {CloudFormationStackProps} props The stack properties.
     */
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props: CloudFormationStackProps) {
         super(scope, id, props);
-        const websiteBucket: s3.Bucket = this.createOrUpdateWebsiteBucket();
-        const messageTable: dynamodb.Table = this.createOrUpdateMessageTable();
-        const serverLambda: lambda.Function = this.createOrUpdateServerLambda(messageTable);
-        const messageApi: apig.LambdaRestApi = this.createOrUpdateMessageServerApi(serverLambda);
+        const websiteBucket: s3.Bucket = this.createOrUpdateWebsiteBucket(props);
+        const messageTable: dynamodb.Table = this.createOrUpdateMessageTable(props);
+        const serverLambda: lambda.Function = this.createOrUpdateServerLambda(messageTable, props);
+        const messageApi: apig.LambdaRestApi = this.createOrUpdateMessageServerApi(serverLambda, props);
         const websiteUser: iam.User = this.createOrUpdateWebsiteUser(messageApi);
     }
 
@@ -35,9 +37,10 @@ export class CloudFormationStack extends cdk.Stack {
     * @private
     * @method createOrUpdateWebsiteBucket
     * @description Creates a S3 bucket to host the website and sets up deployment to the bucket.
+    * @param {CloudFormationStackProps} props The stack properties.
     * @returns {s3.Bucket} The S3 bucket.
     */
-    createOrUpdateWebsiteBucket(): s3.Bucket {
+    createOrUpdateWebsiteBucket(props: CloudFormationStackProps): s3.Bucket {
 
         // Create S3 Bucket to host the core website.
         const websiteBucket: s3.Bucket = new s3.Bucket(this, 'WebsiteBucket', {
@@ -69,11 +72,14 @@ export class CloudFormationStack extends cdk.Stack {
     * @private
     * @method createOrUpdateMessageTable
     * @description Creates a DynamoDB table to store messages.
+    * @param {CloudFormationStackProps} props The stack properties.
     * @returns {dynamodb.Table} The DynamoDB table.
     */
-    createOrUpdateMessageTable(): dynamodb.Table {
+    createOrUpdateMessageTable(props: CloudFormationStackProps): dynamodb.Table {
         // Create DynamoDB table to store the messages. Encrypted by default.
-        return new dynamodb.Table(this, 'MessageTable', {
+        const tableId: string = 'MessageTable';
+        return new dynamodb.Table(this, tableId, {
+            tableName: CloudFormationStackUtils.getResourceName(tableId, props),
             partitionKey: {
                 name: 'id',
                 type: dynamodb.AttributeType.STRING,
@@ -86,9 +92,10 @@ export class CloudFormationStack extends cdk.Stack {
     * @method createOrUpdateServerLambda
     * @description Creates a Lambda function to handle requests to the website.
     * @param {dynamodb.Table} messageTable The DynamoDB table to store messages.
+    * @param {CloudFormationStackProps} props The stack properties.
     * @returns {lambda.Function} The Lambda function.
     */
-    createOrUpdateServerLambda(messageTable: dynamodb.Table): lambda.Function {
+    createOrUpdateServerLambda(messageTable: dynamodb.Table, props: CloudFormationStackProps): lambda.Function {
 
         // Define lambda function code as assets to be deployed with the rest of
         // the infrastructure.
@@ -97,7 +104,9 @@ export class CloudFormationStack extends cdk.Stack {
         })
 
         // Create a Server Lambda resource
-        const serverLambda: lambda.Function = new lambda.Function(this, 'ServerLambda', {
+        const functionId: string = "ServerLambda";
+        const serverLambda: lambda.Function = new lambda.Function(this, functionId, {
+            functionName: CloudFormationStackUtils.getResourceName(functionId, props),
             runtime: lambda.Runtime.PYTHON_3_9,
             code: lambda.Code.fromBucket(
                 lambdaAsset.bucket,
@@ -124,12 +133,15 @@ export class CloudFormationStack extends cdk.Stack {
     * @method createOrUpdateMessageServerApi
     * @description Creates a REST API to expose the Lambda function.
     * @param {lambda.Function} serverLambda The Lambda function that handles the api requests.
+    * @param {CloudFormationStackProps} props The stack properties.
     * @returns {apig.LambdaRestApi} The REST API.
     */
-    createOrUpdateMessageServerApi(serverLambda: lambda.Function): apig.LambdaRestApi {
+    createOrUpdateMessageServerApi(serverLambda: lambda.Function, props: CloudFormationStackProps): apig.LambdaRestApi {
 
         // Instantiate rest api.
-        const restApi = new apig.LambdaRestApi(this, "MessageServerAPI", {
+        const restApiId: string = "MessageServerAPI";
+        const restApi = new apig.LambdaRestApi(this, restApiId, {
+            restApiName: CloudFormationStackUtils.getResourceName(restApiId, props),
             handler: serverLambda,
             proxy: false,
             // Allow all origins - we maintain security with the AWS Credentials and prevent
@@ -137,6 +149,9 @@ export class CloudFormationStack extends cdk.Stack {
             defaultCorsPreflightOptions: {
                 allowOrigins: ["*"],
                 allowCredentials: true,
+            },
+            deployOptions: {
+                stageName: props.stageName,
             }
         });
 
