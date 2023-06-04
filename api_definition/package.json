@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "clean": "rm -rf ../website/src/.generated-sources/openapi",
+    "build": "npx @openapitools/openapi-generator-cli generate -i MessageServerAPI.json -g typescript -o ../website/src/.generated-sources/openapi",
+    "dev-build": "npm run clean && npm run build"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.6.0"
+  }
+}
