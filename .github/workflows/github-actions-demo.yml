@@ -12,6 +12,7 @@ on:
     - pipeline-mayhem
 
 jobs:
+
   Lint-Python-Server-Lambda:
     runs-on: ubuntu-latest
     steps:
@@ -19,12 +20,25 @@ jobs:
 
   Test-Python-Server-Lambda:
     runs-on: ubuntu-latest
+    # Don't bother testing if it doesn't pass linting.
+    needs: Lint-Python-Server-Lambda
     steps:
       - run: echo "This is Test-Python-Server-Lambda"
 
-  Job-That-Requires-Other-Two:
+  Test-Cloud-Formation-Template:
     runs-on: ubuntu-latest
-    needs: [Lint-Python-Server-Lambda, Test-Python-Server-Lambda]
+    steps:
+      - run: echo "This is a Lint-Python-Server-Lambda"
+
+  Test-Website:
+    runs-on: ubuntu-latest
+    # Don't bother testing if it doesn't pass linting.
+    steps:
+      - run: echo "This is Test-Python-Server-Lambda"
+
+  Test-Full-Deployment-Maybe:
+    runs-on: ubuntu-latest
+    needs: [Test-Python-Server-Lambda, Test-Cloud-Formation-Template, Test-Website]
     steps:
       - run: echo "This is Job-That-Requires-Other-Two
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
