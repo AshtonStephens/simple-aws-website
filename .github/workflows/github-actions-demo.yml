@@ -31,9 +31,18 @@ jobs:
         uses: Gr1N/setup-poetry@v8
       - run: python --version
       - run: poetry --version
-      - run: poetry install
-      - run: poetry run pylint src tests
-      - run: poetry run pytest
+
+      - name: Install python dependencies
+        working-directory: ./lambda
+        run: poetry install
+
+      - name: Pylint
+        working-directory: ./lambda
+        run: poetry run pylint src tests
+
+      - name: Pytest
+        working-directory: ./lambda
+        run: poetry run pytest
 
   # Test-Python-Server-Lambda:
   #   runs-on: ubuntu-latest
