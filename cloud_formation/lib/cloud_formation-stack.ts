@@ -26,46 +26,16 @@ export class CloudFormationStack extends cdk.Stack {
     */
     constructor(scope: Construct, id: string, props: CloudFormationStackProps) {
         super(scope, id, props);
-        const websiteBucket: s3.Bucket = this.createOrUpdateWebsiteBucket(props);
         const messageTable: dynamodb.Table = this.createOrUpdateMessageTable(props);
-        const serverLambda: lambda.Function = this.createOrUpdateServerLambda(messageTable, props);
-        const messageApi: apig.LambdaRestApi = this.createOrUpdateMessageServerApi(serverLambda, props);
-        const websiteUser: iam.User = this.createOrUpdateWebsiteUser(messageApi);
-    }
 
-    /**
-    * @private
-    * @method createOrUpdateWebsiteBucket
-    * @description Creates a S3 bucket to host the website and sets up deployment to the bucket.
-    * @param {CloudFormationStackProps} props The stack properties.
-    * @returns {s3.Bucket} The S3 bucket.
-    */
-    createOrUpdateWebsiteBucket(props: CloudFormationStackProps): s3.Bucket {
+        const serverLambdaId: string = "ServerLambda"
+        const serverLambda: lambda.Function = this.createOrUpdateServerLambda(
+            serverLambdaId, messageTable, props);
+        const messageApi: apig.SpecRestApi = this.createOrUpdateMessageServerApi(
+            serverLambdaId, serverLambda, props);
 
-        // Create S3 Bucket to host the core website.
-        const websiteBucket: s3.Bucket = new s3.Bucket(this, 'WebsiteBucket', {
-            websiteIndexDocument: "index.html", // TODO: Move constants to a configuration file.
-            websiteErrorDocument: "404.html",
-            publicReadAccess: true,
-            // Note: block public access options supercedes other access policies.
-            // Setting all of these to false does not allow the public to do anything
-            // beyond what they are allowed by other explicit policies.
-            blockPublicAccess: {
-                blockPublicAcls: false,
-                blockPublicPolicy: false,
-                ignorePublicAcls: false,
-                restrictPublicBuckets: false,
-            }
-        });
-
-        // Create deployment.
-        new s3deploy.BucketDeployment(this, 'WebsiteDeployment', {
-            sources: [s3deploy.Source.asset(resolve(__dirname, "../../website/src"))],
-            destinationBucket: websiteBucket,
-        });
-
-        // Return bucket resource.
-        return websiteBucket;
+        const websiteUser: iam.User = this.createOrUpdateWebsiteUser(messageApi, props);
+        const websiteBucket: s3.Bucket = this.createOrUpdateWebsiteBucket(messageApi, props);
     }
 
     /**
@@ -91,11 +61,16 @@ export class CloudFormationStack extends cdk.Stack {
     * @private
     * @method createOrUpdateServerLambda
     * @description Creates a Lambda function to handle requests to the website.
+    * @param {string} serverLambdaId The function id of the server lambda.
     * @param {dynamodb.Table} messageTable The DynamoDB table to store messages.
     * @param {CloudFormationStackProps} props The stack properties.
     * @returns {lambda.Function} The Lambda function.
     */
-    createOrUpdateServerLambda(messageTable: dynamodb.Table, props: CloudFormationStackProps): lambda.Function {
+    createOrUpdateServerLambda(
+        serverLambdaId: string,
+        messageTable: dynamodb.Table,
+        props: CloudFormationStackProps
+    ): lambda.Function {
 
         // Define lambda function code as assets to be deployed with the rest of
         // the infrastructure.
@@ -104,9 +79,8 @@ export class CloudFormationStack extends cdk.Stack {
         })
 
         // Create a Server Lambda resource
-        const functionId: string = "ServerLambda";
-        const serverLambda: lambda.Function = new lambda.Function(this, functionId, {
-            functionName: CloudFormationStackUtils.getResourceName(functionId, props),
+        const serverLambda: lambda.Function = new lambda.Function(this, serverLambdaId, {
+            functionName: CloudFormationStackUtils.getResourceName(serverLambdaId, props),
             runtime: lambda.Runtime.PYTHON_3_9,
             code: lambda.Code.fromBucket(
                 lambdaAsset.bucket,
@@ -131,41 +105,37 @@ export class CloudFormationStack extends cdk.Stack {
     /**
     * @private
     * @method createOrUpdateMessageServerApi
-    * @description Creates a REST API to expose the Lambda function.
+    * @description Creates a REST API from an OpenAPI definiton to with a lambda backend.
+    * @param {string} serverLambdaId The function id of the server lambda.
     * @param {lambda.Function} serverLambda The Lambda function that handles the api requests.
     * @param {CloudFormationStackProps} props The stack properties.
-    * @returns {apig.LambdaRestApi} The REST API.
+    * @returns {apig.SpecRestApi} The REST API.
     */
-    createOrUpdateMessageServerApi(serverLambda: lambda.Function, props: CloudFormationStackProps): apig.LambdaRestApi {
+    createOrUpdateMessageServerApi(
+        serverLambdaId: string,
+        serverLambda: lambda.Function,
+        props: CloudFormationStackProps
+    ): apig.SpecRestApi {
 
-        // Instantiate rest api.
-        const restApiId: string = "MessageServerAPI";
-        const restApi = new apig.LambdaRestApi(this, restApiId, {
+        // Generate MessageServerApi from MessageServerAPI.json OpenAPI3 definition with
+        // aws integrations specified. We do string replacement at runtime to 
+        const restApiId: string  = "MessageServerAPI";
+        const restApi: apig.SpecRestApi = new apig.SpecRestApi(this, restApiId, {
             restApiName: CloudFormationStackUtils.getResourceName(restApiId, props),
-            handler: serverLambda,
-            proxy: false,
-            // Allow all origins - we maintain security with the AWS Credentials and prevent
-            // misuse with throttling.
-            defaultCorsPreflightOptions: {
-                allowOrigins: ["*"],
-                allowCredentials: true,
-            },
-            deployOptions: {
-                stageName: props.stageName,
-            }
+            apiDefinition: CloudFormationStackUtils.restApiDefinitionWithLambdaIntegration(
+                resolve(__dirname, "../../api_definition/MessageServerAPI.json"),
+                serverLambdaId,
+                props,
+            ),
+            deployOptions: { stageName: props.stageName },
         });
 
-        // Add api calls for base messages api.
-        const messages = restApi.root.addResource('messages');
-        messages.addMethod('GET');   // GET /messages
-        messages.addMethod('POST');  // POST /messages
-
-        // Add api call for geting a message by id.
-        const message = messages.addResource('{message_id}');
-
-        // Define `message_id` as a required parameter so autogenerated SDK includes it when generating path.
-        const messageResourceMethodOptions = { requestParameters: { "method.request.path.message_id": true } }
-        message.addMethod('GET', undefined, messageResourceMethodOptions); // GET /messages/{message_id}
+        // Give the the rest api execute ARN permission to invoke the lambda.
+        serverLambda.addPermission("ApiInvokeLambdaPermission", {
+            principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+            action: "lambda:InvokeFunction",
+            sourceArn: restApi.arnForExecuteApi(),
+        });
 
         // Return api resource.
         return restApi;
@@ -175,12 +145,88 @@ export class CloudFormationStack extends cdk.Stack {
     * @private
     * @method createOrUpdateWebsiteUser
     * @description Creates an IAM user for the website to access the message api.
-    * @param {apig.LambdaRestApi} messageApi The API the user should will access to.
+    * @param {apig.SpecRestApi} messageApi The API the user should will access to.
     * @returns {iam.User} The IAM user.
     */
-    createOrUpdateWebsiteUser(messageApi: apig.LambdaRestApi): iam.User {
+    createOrUpdateWebsiteUser(messageApi: apig.SpecRestApi, props: CloudFormationStackProps): iam.User {
         const websiteUser = new iam.User(this, "WebsiteUser");
-        messageApi.methods.forEach((method) => method.grantExecute(websiteUser));
+
+        // Create a website user and give them access to all the the api calls
+        const messageApiAccessPolicyId: string = "MessageApiAccessPolicy";
+        const websiteUserPolicy = new iam.Policy(this, messageApiAccessPolicyId, {
+            policyName: CloudFormationStackUtils.getResourceName(messageApiAccessPolicyId, props),
+            users: [websiteUser],
+            statements: [
+                new iam.PolicyStatement({
+                    actions: ["execute-api:Invoke"],
+                    resources: [messageApi.arnForExecuteApi()],
+                    effect: iam.Effect.ALLOW,
+                }),
+            ]
+        });
+
+        // Return website user.
         return websiteUser;
+    }
+
+    /**
+    * @private
+    * @method createOrUpdateWebsiteBucket
+    * @description Creates a S3 bucket to host the website and sets up deployment to the bucket.
+    * @param {apig.SpecRestApi} messageApi The API the website should call.
+    * @param {CloudFormationStackProps} props The stack properties.
+    * @returns {s3.Bucket} The S3 bucket.
+    */
+    createOrUpdateWebsiteBucket(
+        messageApi: apig.SpecRestApi,
+        props: CloudFormationStackProps
+    ): s3.Bucket {
+
+        // Create S3 Bucket to host the core website.
+        const websiteBucketId: string = 'WebsiteBucket';
+        const websiteBucket: s3.Bucket = new s3.Bucket(this, websiteBucketId, {
+            // Bucket name must be lowercase.
+            bucketName: CloudFormationStackUtils.getResourceName(websiteBucketId, props).toLowerCase(),
+            websiteIndexDocument: "index.html", // TODO: Move constants to a configuration file.
+            websiteErrorDocument: "404.html",
+            publicReadAccess: true,
+
+            // Note: block public access options supercedes other access policies.
+            // Setting all of these to false does not allow the public to do anything
+            // beyond what they are allowed by other explicit policies.
+            blockPublicAccess: {
+                blockPublicAcls: false,
+                blockPublicPolicy: false,
+                ignorePublicAcls: false,
+                restrictPublicBuckets: false,
+            }
+        });
+
+        // Create json data for the website to use at runtime.
+        // The autogenerated API client doesn't know the api endpoing url at generation time
+        // so it needs to be provided directly to the website bucket.
+        const websiteConfig: any = {
+            "apiEndpoint": messageApi.urlForPath(),
+            // TODO: Require access keys for api using sigv4 auth.
+            // "websiteUserAccessKey": props.websiteUserAccessKey,
+            // "websiteUserSecretKey": props.websiteUserSecretKey,
+        };
+
+        // Create deployment.
+        new s3deploy.BucketDeployment(this, 'WebsiteDeployment', {
+            sources: [
+                s3deploy.Source.asset(resolve(__dirname, "../../website/dist"), {
+                    exclude: [
+                        '*.DS_Store',
+                        'config.json',
+                    ],
+                }),
+                s3deploy.Source.jsonData("config.json", websiteConfig),
+            ],
+            destinationBucket: websiteBucket,
+        });
+
+        // Return bucket resource.
+        return websiteBucket;
     }
 }
