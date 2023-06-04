@@ -52,10 +52,17 @@ class EventHandler:
             if event['resource'] == "/messages":
                 if event['httpMethod'] == "POST":
 
+                    # Trim either side of the body if the message is encompassed by quotes.
+                    # If the user wants to include quotes on either side then they will need
+                    # to double up on quotes.
+                    message = event['body']
+                    if message[0] == '"' and message[-1] == '"':
+                        message = message[1:-1]
+
                     # Create a message resource with a new unique id.
                     message_resource = {
                         'id': str(self.uuid_factory()),
-                        'message': event['body'],
+                        'message': message,
                     }
 
                     # Package as dynamo db item.

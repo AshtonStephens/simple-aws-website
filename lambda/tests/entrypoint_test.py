@@ -35,7 +35,7 @@ class EventHandlerTest(TestCase):
         event = {
             'resource': '/messages',
             'httpMethod': 'POST',
-            'body': TEST_MESSAGE,
+            'body': f'"{TEST_MESSAGE}"',
         }
 
         # Act
