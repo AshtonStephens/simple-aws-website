@@ -7,6 +7,10 @@ on:
         # Pull request types can be found here:
         # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
         types: [opened, synchronize, reopened]
+    push:
+        branches:
+            - pipeline-mayhem
+
 
 jobs:
   Explore-GitHub-Actions:
