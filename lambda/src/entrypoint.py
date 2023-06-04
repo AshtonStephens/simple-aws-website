@@ -35,7 +35,7 @@ class EventHandler:
         self.table_name = table_name
         self.uuid_factory = uuid_factory
 
-    def handle(self, event, context):
+    def handle(self, event, context): # pylint: disable=unused-argument
         """
         Lambda handler function that handles requests to the `/messages` endpoint.
 
@@ -112,7 +112,7 @@ class EventHandler:
                 f"Unsupported API Call: Method {event['httpMethod']}, " +
                 f"Resource {event['resource']}.")
 
-        except Exception as exception:
+        except Exception as exception: # pylint: disable=broad-except
             # TODO: Include more robust error handling and more useful messages.
             return package_response(400, str(exception))
 
@@ -121,12 +121,14 @@ def handler(event, context):
     """
     Invokes the `EventHandler` class to handle a request to the `/messages` endpoint.
 
-    Args:
-        event: The event object that was passed to the Lambda function.
-        context: The context object that was passed to the Lambda function.
+    **Args:**
 
-    Returns:
-        A response object that contains the status code and body of the response.
+    * `event`: The event object that was passed to the Lambda function.
+    * `context`: The context object that was passed to the Lambda function.
+
+    **Returns:**
+
+    A response object that contains the status code and body of the response.
     """
 
     # Get the DynamoDB client.

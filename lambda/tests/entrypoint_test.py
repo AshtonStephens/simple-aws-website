@@ -9,7 +9,7 @@ from src.entrypoint import EventHandler
 # Testing Constants
 TEST_TABLE_NAME = "TestTableName"
 TEST_UUID = "a4b90c1b-4b38-4fde-85de-601cbc3e54b8"
-TEST_UUID_FACTORY = lambda: TEST_UUID
+TEST_UUID_FACTORY = lambda: TEST_UUID  # pylint: disable=unnecessary-lambda-assignment
 TEST_LAMBDA_CONTEXT = None
 TEST_MESSAGE = "This is a test message."
 EXPECTED_RESPONSE_HEADERS = {
