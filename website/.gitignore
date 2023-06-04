@@ -1,0 +1,5 @@
+# Exclude webpack generated files.
+dist/bundle.*
+
+# Exclude local config file.
+dist/config.json
