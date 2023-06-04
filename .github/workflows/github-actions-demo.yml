@@ -1,21 +1,32 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
-    pull_request:
-        branches:
-            - pipeline-mayhem
-        # Pull request types can be found here:
-        # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
-        types: [opened, synchronize, reopened]
-    push:
-        branches:
-            - pipeline-mayhem
-
+  pull_request:
+    branches:
+    - pipeline-mayhem
+      # Pull request types can be found here:
+      # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+    - pipeline-mayhem
 
 jobs:
-  Explore-GitHub-Actions:
+  Lint-Python-Server-Lambda:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "This is a Lint-Python-Server-Lambda"
+
+  Test-Python-Server-Lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This is Test-Python-Server-Lambda"
+
+  Job-That-Requires-Other-Two:
+    runs-on: ubuntu-latest
+    needs: [Lint-Python-Server-Lambda, Test-Python-Server-Lambda]
+    steps:
+      - run: echo "This is Job-That-Requires-Other-Two
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
