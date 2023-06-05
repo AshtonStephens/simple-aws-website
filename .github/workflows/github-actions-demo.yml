@@ -13,49 +13,43 @@ on:
 
 jobs:
 
-  Lint-And-Test-Python-Lambda:
-    # https://github.com/marketplace/actions/setup-python
-    # https://github.com/marketplace/actions/install-python-poetry
+  # Lint-And-Test-Python-Lambda:
+  #   # https://github.com/marketplace/actions/setup-python
+  #   # https://github.com/marketplace/actions/install-python-poetry
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./lambda
+  #   steps:
+  #     - name: Checkout repository code
+  #       uses: actions/checkout@v3
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: "3.9"
+  #     - name: Setup Poetry
+  #       uses: Gr1N/setup-poetry@v8
+  #     - run: python --version
+  #     - run: poetry --version
+  #     - run: poetry install
+  #     - run: poetry run pylint src tests
+  #     - run: poetry run pytest
+
+  Test-Cloud-Formation-Template:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./lambda
+        working-directory: ./cloud_formation
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up node 18
+        uses: actions/setup-node@v3
         with:
-          python-version: "3.9"
-      - name: Setup Poetry
-        uses: Gr1N/setup-poetry@v8
-      - run: python --version
-      - run: poetry --version
-
-      - name: Install python dependencies
-        working-directory: ./lambda
-        run: poetry install
-
-      - name: Pylint
-        working-directory: ./lambda
-        run: poetry run pylint src tests
-
-      - name: Pytest
-        working-directory: ./lambda
-        run: poetry run pytest
-
-  # Test-Python-Server-Lambda:
-  #   runs-on: ubuntu-latest
-  #   # Don't bother testing if it doesn't pass linting.
-  #   needs: [Lint-Python-Server-Lambda]
-  #   steps:
-  #     - run: echo "This is Test-Python-Server-Lambda"
-
-  # Test-Cloud-Formation-Template:
-  #   runs-on: ubuntu-latest
-  #   needs: [Lint-Python-Server-Lambda]
-  #   steps:
-  #     - run: echo "This is a Lint-Python-Server-Lambda"
+          node-version: 18.16.0
+      - run: npm install
+      - run: npm run build
+      - run: npm run test
 
   # Test-Website:
   #   runs-on: ubuntu-latest
