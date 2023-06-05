@@ -183,7 +183,7 @@ export class CloudFormationStack extends cdk.Stack {
     ): s3.Bucket {
 
         // Create S3 Bucket to host the core website.
-        const websiteBucketId: string = 'WebsiteBucketTEST';
+        const websiteBucketId: string = 'WebsiteBucket';
         const websiteBucket: s3.Bucket = new s3.Bucket(this, websiteBucketId, {
             // Bucket name must be lowercase.
             bucketName: CloudFormationStackUtils.getResourceName(websiteBucketId, props).toLowerCase(),
