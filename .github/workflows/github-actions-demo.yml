@@ -43,14 +43,85 @@ jobs:
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v3
-      - name: Set up node 18
+      - name: Set up node 18.16
         uses: actions/setup-node@v3
         with:
           node-version: 18.16.0
       - run: npm install
       - run: npm run build
       - run: npm run test
-      - run: cdk synthesize
+
+      # https://github.com/marketplace/actions/aws-cdk-github-actions
+      # - name: cdk deploy
+      #   uses: youyo/aws-cdk-github-actions@v2
+      #   with:
+      #     cdk_subcommand: 'deploy'
+      #     working_dir: ./cloud_formation
+      #   env:
+      #     # AWS access keys with permission to deploy to cloud formation
+      #     # NOTE: I need full access to the repo to store secrets. This is a
+      #     # Temporary measure.
+      #     AWS_ACCESS_KEY_ID: AKIA2ZSOLEBV5PGPKB66
+      #     AWS_SECRET_ACCESS_KEY: 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
+      #     # AWS Deployment Account and Configurations
+      #     AWS_ACCOUNT: 742119907435
+      #     AWS_REGION: us-west-2
+      #     AWS_STAGE: beta
+
+
+  Test-Autogenerate-Api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api_definition
+    steps:
+      - name: Setup Java 20
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 20.0.1
+      - name: Set up node 18.16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.16.0
+      - run: npm install
+      - run: npm run build
+
+  # Deploy-To-Cloud-Formation:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository code
+  #       uses: actions/checkout@v3
+  #     - name: Set up node 18.16
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18.16.0
+
+  #     # - name:
+  #     - name: Build cloud formation
+  #       run: |
+  #         npm install && \
+  #         npm run build
+  #       working-directory: ./cloud_formation
+  #     # TODO: Make api
+  #     # https://github.com/marketplace/actions/aws-cdk-github-actions
+  #     - name: cdk deploy
+  #       uses: youyo/aws-cdk-github-actions@v2
+  #       with:
+  #         cdk_subcommand: 'deploy'
+  #         working_dir: ./cloud_formation
+  #       env:
+  #         # AWS access keys with permission to deploy to cloud formation
+  #         # NOTE: I need full access to the repo to store secrets. This is a
+  #         # Temporary measure.
+  #         AWS_ACCESS_KEY_ID: AKIA2ZSOLEBV5PGPKB66
+  #         AWS_SECRET_ACCESS_KEY: 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
+  #         # AWS Deployment Account and Configurations
+  #         AWS_ACCOUNT: 742119907435
+  #         AWS_REGION: us-west-2
+  #         AWS_STAGE: beta
+
+
 
   # Test-Website:
   #   runs-on: ubuntu-latest
