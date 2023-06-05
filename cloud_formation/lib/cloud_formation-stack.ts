@@ -117,8 +117,8 @@ export class CloudFormationStack extends cdk.Stack {
         props: CloudFormationStackProps
     ): apig.SpecRestApi {
 
-        // Generate MessageServerApi from MessageServerAPI.json OpenAPI3 definition with
-        // aws integrations specified. We do string replacement at runtime to 
+        // Generate MessageServerApi from MessageServerAPI.json API definition with
+        // aws integrations specified.
         const restApiId: string  = "MessageServerAPI";
         const restApi: apig.SpecRestApi = new apig.SpecRestApi(this, restApiId, {
             restApiName: CloudFormationStackUtils.getResourceName(restApiId, props),
