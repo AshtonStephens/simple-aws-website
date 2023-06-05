@@ -127,7 +127,7 @@ jobs:
 
       - name: Deploy environment
         working-directory: ./cloud_formation
-        run: cdk deploy
+        run: cdk deploy --require-approval never
         env:
           # AWS access keys with permission to deploy to cloud formation
           # NOTE: I need full access to the repo to store secrets. This is a
