@@ -1,5 +1,5 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+name: Pre-merge Test and Build Workflow
+run-name: ${{ github.actor }}\'s commit is being tested!
 on:
   pull_request:
     branches:
