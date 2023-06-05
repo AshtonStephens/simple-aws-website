@@ -13,6 +13,10 @@ on:
 
 jobs:
 
+  # #################################################
+  # Python code test and lint
+  # #################################################
+
   # Lint-And-Test-Python-Lambda:
   #   # https://github.com/marketplace/actions/setup-python
   #   # https://github.com/marketplace/actions/install-python-poetry
@@ -35,38 +39,25 @@ jobs:
   #     - run: poetry run pylint src tests
   #     - run: poetry run pytest
 
-  Test-Cloud-Formation-Template:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./cloud_formation
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v3
-      - name: Set up node 18.16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.16.0
-      - run: npm install
-      - run: npm run build
-      - run: npm run test
+  # #################################################
+  # Cloud formation template
+  # #################################################
 
-      # https://github.com/marketplace/actions/aws-cdk-github-actions
-      # - name: cdk deploy
-      #   uses: youyo/aws-cdk-github-actions@v2
-      #   with:
-      #     cdk_subcommand: 'deploy'
-      #     working_dir: ./cloud_formation
-      #   env:
-      #     # AWS access keys with permission to deploy to cloud formation
-      #     # NOTE: I need full access to the repo to store secrets. This is a
-      #     # Temporary measure.
-      #     AWS_ACCESS_KEY_ID: AKIA2ZSOLEBV5PGPKB66
-      #     AWS_SECRET_ACCESS_KEY: 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
-      #     # AWS Deployment Account and Configurations
-      #     AWS_ACCOUNT: 742119907435
-      #     AWS_REGION: us-west-2
-      #     AWS_STAGE: beta
+  # Test-Cloud-Formation-Template:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./cloud_formation
+  #   steps:
+  #     - name: Checkout repository code
+  #       uses: actions/checkout@v3
+  #     - name: Set up node 18.16
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18.16.0
+  #     - run: npm install
+  #     - run: npm run build
+  #     - run: npm run test
 
 
   Test-Autogenerate-Api:
@@ -79,7 +70,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: corretto
-          java-version: 20.0.1
+          java-version: 20
       - name: Set up node 18.16
         uses: actions/setup-node@v3
         with:
@@ -120,6 +111,25 @@ jobs:
   #         AWS_ACCOUNT: 742119907435
   #         AWS_REGION: us-west-2
   #         AWS_STAGE: beta
+
+
+
+  #     # https://github.com/marketplace/actions/aws-cdk-github-actions
+  #     # - name: cdk deploy
+  #     #   uses: youyo/aws-cdk-github-actions@v2
+  #     #   with:
+  #     #     cdk_subcommand: 'deploy'
+  #     #     working_dir: ./cloud_formation
+  #     #   env:
+  #     #     # AWS access keys with permission to deploy to cloud formation
+  #     #     # NOTE: I need full access to the repo to store secrets. This is a
+  #     #     # Temporary measure.
+  #     #     AWS_ACCESS_KEY_ID: AKIA2ZSOLEBV5PGPKB66
+  #     #     AWS_SECRET_ACCESS_KEY: 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
+  #     #     # AWS Deployment Account and Configurations
+  #     #     AWS_ACCOUNT: 742119907435
+  #     #     AWS_REGION: us-west-2
+  #     #     AWS_STAGE: beta
 
 
 
