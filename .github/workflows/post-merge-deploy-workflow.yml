@@ -68,6 +68,7 @@ jobs:
 
   Integration-Test:
     runs-on: ubuntu-latest
+    needs: Deploy-To-Beta
     steps:
       - run: echo "Placeholder"
 
@@ -78,6 +79,7 @@ jobs:
 
   Deploy-To-Prod:
     runs-on: ubuntu-latest
+    needs: Integration-Test
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v3

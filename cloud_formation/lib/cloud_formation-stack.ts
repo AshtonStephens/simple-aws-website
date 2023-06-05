@@ -118,7 +118,7 @@ export class CloudFormationStack extends cdk.Stack {
     ): apig.SpecRestApi {
 
         // Generate MessageServerApi from MessageServerAPI.json OpenAPI3 definition with
-        // aws integrations specified. We do string replacement at runtime to 
+        // aws integrations specified. We do string replacement at runtime to
         const restApiId: string  = "MessageServerAPI";
         const restApi: apig.SpecRestApi = new apig.SpecRestApi(this, restApiId, {
             restApiName: CloudFormationStackUtils.getResourceName(restApiId, props),
@@ -183,7 +183,7 @@ export class CloudFormationStack extends cdk.Stack {
     ): s3.Bucket {
 
         // Create S3 Bucket to host the core website.
-        const websiteBucketId: string = 'WebsiteBucket';
+        const websiteBucketId: string = 'WebsiteBucketTEST';
         const websiteBucket: s3.Bucket = new s3.Bucket(this, websiteBucketId, {
             // Bucket name must be lowercase.
             bucketName: CloudFormationStackUtils.getResourceName(websiteBucketId, props).toLowerCase(),
