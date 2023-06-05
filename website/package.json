@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Tests not implemented yet.\"",
     "build-dev": "webpack --mode development",
+    "watch": "webpack --mode development --watch",
     "build": "webpack --mode production"
   },
   "keywords": [],

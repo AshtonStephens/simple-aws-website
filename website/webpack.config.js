@@ -26,4 +26,8 @@ module.exports = {
   },
   // Set 'mode' option to 'development' or 'production' to enable defaults for each environment.
   mode: 'development',
+  // Look for changes every second.
+  watchOptions: {
+    poll: 1000,
+  }
 };
