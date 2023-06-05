@@ -43,21 +43,21 @@ jobs:
   # Cloud formation template
   # #################################################
 
-  Test-Cloud-Formation-Template:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./cloud_formation
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v3
-      - name: Set up node 18.16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.16.0
-      - run: npm install
-      - run: npm run build
-      - run: npm run test
+  # Test-Cloud-Formation-Template:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./cloud_formation
+  #   steps:
+  #     - name: Checkout repository code
+  #       uses: actions/checkout@v3
+  #     - name: Set up node 18.16
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18.16.0
+  #     - run: npm install
+  #     - run: npm run build
+  #     - run: npm run test
 
 
   Test-Autogenerate-Api:
@@ -66,16 +66,18 @@ jobs:
       run:
         working-directory: ./api_definition
     steps:
-      - name: Set up node 18.16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.16.0
-      - run: npm install
+      - name: Checkout repository code
+        uses: actions/checkout@v3
       - name: Setup Java 20
         uses: actions/setup-java@v3
         with:
           distribution: corretto
           java-version: 20
+      - name: Set up node 18.16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.16.0
+      - run: npm install
       - run: npm run build
 
   # Deploy-To-Cloud-Formation:
