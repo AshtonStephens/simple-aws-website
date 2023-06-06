@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "my_project"
+version = "0.1.0"
+description = "A simple Python project that uses boto3."
+authors = ["Your Name <your_email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+boto3 = "^1.26"
+pylint = "^2.17.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
