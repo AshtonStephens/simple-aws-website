@@ -46,7 +46,8 @@ for arg in "${args[@]}"; do
     elif [[ $arg == "lint" ]]; then
 
         echo "Linting Python"
-        (cd lambda && poetry pytest)
+        (cd lambda && poetry run pylint src tests)
+
 
     elif [[ $arg == "test" ]]; then
 
