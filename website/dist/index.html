@@ -16,13 +16,13 @@
   </div>
 
   <div>
-    <button onclick="buttonEventHandler.createMessage()">Send Message</button>
+    <button onclick="buttonEventHandler.createMessage('messageToSend', 'sentMessageId')">Send Message</button>
     <input type="text" id="messageToSend">
     <p id="sentMessageId"></p>
   </div>
 
   <div>
-    <button onclick="buttonEventHandler.getMessage()">Get Message</button>
+    <button onclick="buttonEventHandler.getMessage('messageId', 'messageFromId')">Get Message</button>
     <input type="text" id="messageId">
     <p id="messageFromId"></p>
   </div>

@@ -62,9 +62,9 @@ async function createMessage(
   // Get the HTML elements to set the message ID to.
   const htmlElementWithMessage: HTMLInputElement | null = document.getElementById(elementIdToGet) as HTMLInputElement;
   const htmlElementToSet: HTMLElement | null = document.getElementById(elementIdToSet);
-
   if (htmlElementToSet !== null && htmlElementWithMessage !== null) {
     // Get the configured API.
+    console.log("Asda");
     await configuredApi
       // Create a message with the given message.
       .then((api) => api.createMessage(htmlElementWithMessage.value))
