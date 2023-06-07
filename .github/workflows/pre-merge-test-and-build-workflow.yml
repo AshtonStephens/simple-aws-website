@@ -3,6 +3,7 @@ run-name: ${{ github.actor }}s commit is being tested!
 on:
   pull_request:
     branches:
+      - cleanup-2
       - cleanup
       - main
       # Pull request types can be found here:
@@ -10,6 +11,7 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches:
+      - cleanup-2
       - cleanup
       - main
 

@@ -3,6 +3,7 @@ run-name: ${{ github.actor }}s commit is being deployed!
 on:
   push:
     branches:
+    - cleanup-2
     - cleanup
     - main
 
