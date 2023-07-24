@@ -1,0 +1,85 @@
+#!/bin/zsh
+
+# This script is used to install, build, and clean a this project.
+# Options:
+#  - install
+#  - build
+#  - lint
+#  - test
+#  - deploy
+#  - clean
+#
+# If you want, you can string the options together like `./build-scripts install build deploy clean`
+
+# Get the input parameters
+
+args=("$@")
+for arg in "${args[@]}"; do
+
+    # Check the first argument to see what action to take.
+    if [[ $arg == "install" ]]; then
+
+        # Install all dependencies at the same time.
+        # Redirect stdout to `/dev/null` so we only hear from the command if it's failing.
+        echo Installing all dependencies
+        (cd cloud_formation && npm install 1> /dev/null) &
+        (cd api_definition && npm install  1> /dev/null) &
+        (cd website && npm install 1> /dev/null) &
+        (cd lambda && poetry install 1> /dev/null) &
+        wait
+
+    elif [[ $arg == "build" ]]; then
+
+        # Build cdk and api at the same time because they are independent.
+        # Redirect stdout to `/dev/null` so we only hear from the command if it's failing.
+        echo Building CDK template and Autogenerating API TypeScript
+        (cd cloud_formation && npm run build 1> /dev/null) &
+        (cd api_definition && npm run build-dev 1> /dev/null) &
+        wait
+
+        # Build the website separately because it depends on the api definition being built.
+        # Redirect stdout to `/dev/null` so we only hear from the command if it's failing.
+        echo Webpacking Website
+        (cd website && npm run build-dev 1> /dev/null)
+        wait
+
+    elif [[ $arg == "lint" ]]; then
+
+        echo "Linting Python"
+        (cd lambda && poetry run pylint src tests)
+
+
+    elif [[ $arg == "test" ]]; then
+
+        echo Testing cdk
+        (cd cloud_formation && npm run test)
+
+        echo Testing website
+        (cd website && npm run test)
+
+        echo Testing lambda
+        (cd lambda && poetry run pytest)
+
+    elif [[ $arg == "deploy" ]]; then
+
+        # Run cdk deploy from cloud_formation directory. Test first to catch any
+        # errors that it would take > 1 minute for `cdk deploy` to figure out.
+        (cd cloud_formation && npm run test && cdk deploy)
+
+    elif [[ $arg == "clean" ]]; then
+
+        # Clean all workspaces at the same time.
+        # Redirect stdout to `/dev/null` so we only hear from the command if it's failing.
+        echo Clean Workspaces
+        (cd cloud_formation && npm run clean 1> /dev/null) &
+        (cd api_definition && npm run clean 1> /dev/null) &
+        (cd website && npm run clean 1> /dev/null) &
+        (cd lambda && poetry cache clear --all . 1> /dev/null) &
+        wait
+
+    else
+        echo "Invalid parameter"
+    fi
+
+    echo "$arg done"
+done

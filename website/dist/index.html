@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Message UI</title>
+    <script src="bundle.js"></script>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+
+<body>
+  <h1>Message Api Interface</h1>
+
+  <div>
+    <button onclick="buttonEventHandler.getMessageCount('messagecount')">Get Message Count</button>
+    <p id="messagecount"></p>
+  </div>
+
+  <div>
+    <button onclick="buttonEventHandler.createMessage('messageToSend', 'sentMessageId')">Send Message</button>
+    <input type="text" id="messageToSend">
+    <p id="sentMessageId"></p>
+  </div>
+
+  <div>
+    <button onclick="buttonEventHandler.getMessage('messageId', 'messageFromId')">Get Message</button>
+    <input type="text" id="messageId">
+    <p id="messageFromId"></p>
+  </div>
+
+</body>
