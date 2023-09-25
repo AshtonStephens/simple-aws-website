@@ -1,5 +1,11 @@
 # Message Demo - Ashton Stephens Tech Project Interview for Trust Machines
 
+- **Prod: http://websitebucket-742119907435-us-east-1-prod.s3-website-us-east-1.amazonaws.com**
+- **Beta: http://websitebucket-742119907435-us-west-2-beta.s3-website-us-west-2.amazonaws.com**
+- **Dev: http://websitebucket-742119907435-us-west-2-dev.s3-website-us-west-2.amazonaws.com**
+
+---
+
 This repository contains all the source code and cloud deployment configurations required to
 fully deploy a server that can send and receive messages, and a website that interacts with it.
 This project is part of an interview series with [Trust Machines](https://trustmachines.co/).
