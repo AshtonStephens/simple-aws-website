@@ -53,11 +53,9 @@ jobs:
         working-directory: ./cloud_formation
         run: cdk bootstrap && cdk deploy --require-approval never
         env:
-          # AWS access keys with permission to deploy to cloud formation
-          # NOTE: I need full access to the repo to store secrets. This is a
-          # temporary measure but very easily swapped out once I have permissions.
-          AWS_ACCESS_KEY_ID: AKIA2ZSOLEBV5PGPKB66
-          AWS_SECRET_ACCESS_KEY: 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
+          # AWS access keys with permission to deploy to cloud formation.
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
           # AWS Deployment Account and Configurations
           AWS_ACCOUNT: 742119907435 # Ashton Stephens' dev account
@@ -119,11 +117,9 @@ jobs:
         working-directory: ./cloud_formation
         run: cdk bootstrap && cdk deploy --require-approval never
         env:
-          # AWS access keys with permission to deploy to cloud formation
-          # NOTE: I need full access to the repo to store secrets. This is a
-          # temporary measure but very easily swapped out once I have permissions.
-          AWS_ACCESS_KEY_ID: AKIA2ZSOLEBV5PGPKB66
-          AWS_SECRET_ACCESS_KEY: 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
+          # AWS access keys with permission to deploy to cloud formation.
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
           # AWS Deployment Account and Configurations
           AWS_ACCOUNT: 742119907435 # Ashton Stephens' dev account
