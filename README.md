@@ -1,11 +1,3 @@
-# Trust Machines DevOps Interview Project
-
-***We would like you to alter this repository to created both a metrics dashboard and debug logs related to the health of the website and AWS resources.*** This task is open ended so you should familiarize yourself with this repository and ask pertinent questions to determine how best to approach the problem. You will be give access to a team of our core engineers who will answer any questions over the duration of this project.
-
-The following is a monorepo with a simple HTTP website hosted on AWS with infrastructure spun up in AWS CDK. It is thoroughly and imperfectly documented.
-
-In order to run this repository you will need to create an AWS account. *Running the contents of this repository multiple times over will still land you easily within the free teir of AWS.* Let us know what concerns you have with this and we can find ways to accomodate.
-
 # Repository README
 ## Introduction
 
