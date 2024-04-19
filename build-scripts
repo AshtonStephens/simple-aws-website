@@ -77,6 +77,57 @@ for arg in "${args[@]}"; do
         (cd lambda && poetry cache clear --all . 1> /dev/null) &
         wait
 
+    elif [[ $arg == "sam-start-api" ]]; then
+
+        echo "Running SAM."
+
+        # Startup the DynamoDB environment. By default it knows of no existing
+        # DynamoDB tables.
+        sudo docker compose down --remove-orphans
+        sudo docker compose up -d
+
+        # This must match the environment variable in the lambda environment vars
+        # under docker/lambda/env.json
+        MESSAGE_TABLE_NAME="MessageTable-local"
+
+        # Create the DynamoDB table to store the messages.
+        # This may complain that the table already exists, but it doesn't matter.
+        aws dynamodb create-table \
+            --table-name "$MESSAGE_TABLE_NAME" \
+            --attribute-definitions AttributeName=id,AttributeType=S \
+            --key-schema AttributeName=id,KeyType=HASH \
+            --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+            --endpoint-url http://localhost:8000 \
+            --output text 1> /dev/null
+
+        # Run the lambda-backed API.
+        (
+            echo "sythesize and launch api with SAM"
+            cd cloud_formation
+            cdk synth -q --no-staging > /dev/null
+            sam local start-api \
+                --env-vars $PWD/../docker/lambda/env.json \
+                --docker-network "aws-local-vpc" \
+                -t ./cdk.out/CloudFormationStack.template.json
+            # TODO: use nohup to run `sam` in the background and expand the
+            # "down" command to use `ps -ef | grep start-api` to find and
+            # gracefully kill sam.
+        )
+
+        # This will never run because the sam command doesn't run in the background.
+        # If you paste this snippet onto the command line it'll make a message and
+        # then retrieve it.
+        (
+            # make a message.
+            RESPONSE=$(curl -X POST -d "little demo string" localhost:3000/messages)
+            echo $RESPONSE | jq
+
+            # retrieve the message.
+            curl -X GET localhost:3000/messages/$(echo $RESPONSE | jq -r ".id")
+        )
+
+    elif [[ $arg == "down" ]]; then
+        sudo docker compose down --remove-orphans
     else
         echo "Invalid parameter"
     fi

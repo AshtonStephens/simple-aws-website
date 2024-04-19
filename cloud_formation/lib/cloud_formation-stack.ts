@@ -5,7 +5,6 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as assets from 'aws-cdk-lib/aws-s3-assets';
 import * as apig from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
@@ -72,26 +71,21 @@ export class CloudFormationStack extends cdk.Stack {
         props: CloudFormationStackProps
     ): lambda.Function {
 
-        // Define lambda function code as assets to be deployed with the rest of
-        // the infrastructure.
-        const lambdaAsset: assets.Asset = new assets.Asset(this, "LambdaAssetsZip", {
-            path: resolve(__dirname, "../../lambda/src"),
-        })
-
         // Create a Server Lambda resource
         const serverLambda: lambda.Function = new lambda.Function(this, serverLambdaId, {
             functionName: CloudFormationStackUtils.getResourceName(serverLambdaId, props),
             runtime: lambda.Runtime.PYTHON_3_9,
-            code: lambda.Code.fromBucket(
-                lambdaAsset.bucket,
-                lambdaAsset.s3ObjectKey,
-            ),
+            code: lambda.Code.fromAsset(resolve(__dirname, "../../lambda/src")),
             // Lambda should be very fast. Something is wrong if it takes > 5 seconds.
             timeout: cdk.Duration.seconds(5),
             handler: "entrypoint.handler", // TODO: Move constants to a configuration file.
             environment: {
                 // Give lambda access to the table name.
                 MESSAGE_TABLE_NAME: messageTable.tableName,
+                // Declare an environment variable that will be overwritten in local SAM
+                // deployments the AWS stack. SAM can only set environment variables that are
+                // already expected to be present in the lambda.
+                IS_LOCAL: "false",
             }
         });
 

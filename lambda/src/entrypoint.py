@@ -132,7 +132,15 @@ def handler(event, context):
     """
 
     # Get the DynamoDB client.
-    client = boto3.client('dynamodb')
+    is_local = os.environ['IS_LOCAL'].lower()
+
+    # Get the DynamoDB client.
+    if is_local == "true":
+        # Use custom local endpoint for the DynamoDB table when the lambda is running locally.
+        # http://dynamodb:8000 comes from the docker-compose.yml file in project root.
+        client = boto3.client('dynamodb', endpoint_url='http://dynamodb:8000')
+    else:
+        client = boto3.client('dynamodb')
 
     # Get the table name from the environment variable provided to the lambda via cloud formation.
     table_name = os.environ['MESSAGE_TABLE_NAME']
