@@ -1,10 +1,18 @@
 {
   "scripts": {
-    "build": "npx @openapitools/openapi-generator-cli generate -i MessageServerAPI.json -g typescript -o ../website/src/.generated-sources/openapi",
-    "clean": "rm -rf node_modules && rm -rf ../website/src/.generated-sources/openapi",
+    "build-ts": "npx @openapitools/openapi-generator-cli generate -i MessageServerAPI.json -g typescript -o ../.generated-sources/openapi-ts",
+    "clean-ts": "rm -rf node_modules && rm -rf ../.generated-sources/openapi-ts",
+    "build-dev-ts": "npm run clean && npm run build",
+
+    "build-rs": "npx @openapitools/openapi-generator-cli generate -i MessageServerAPI.json -g rust -c config.json -o ../.generated-sources/openapi-rs",
+    "clean-rs": "rm -rf node_modules && rm -rf ../.generated-sources/openapi-rs",
+    "build-dev-rs": "npm run clean-rs && npm run build-rs",
+
+    "clean": "npm run clean-ts && npm run clean-rs",
+    "build": "(npm run build-ts)& (npm run build-rs)& wait",
     "build-dev": "npm run clean && npm run build"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.6.0"
+    "@openapitools/openapi-generator-cli": "^2.13.2"
   }
 }

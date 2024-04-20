@@ -1,4 +1,4 @@
-import { createConfiguration, DefaultApi, ServerConfiguration } from "./.generated-sources/openapi"
+import { createConfiguration, DefaultApi, ServerConfiguration } from "../../.generated-sources/openapi-ts"
 import { MessageServerConfig } from "./config_interface";
 
 /**
