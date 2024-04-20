@@ -1,0 +1,18 @@
+[package]
+name = "lambda-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow.workspace = true
+clap = { workspace = true, features = ["derive"] }
+tokio = { workspace = true, features = ["full"] }
+backoff = { workspace = true, features = ["tokio"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+lambda_runtime.workspace = true
+aws_lambda_events.workspace = true
+http.workspace = true
+openapi-rs.workspace = true

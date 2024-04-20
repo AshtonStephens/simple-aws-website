@@ -72,13 +72,36 @@ export class CloudFormationStack extends cdk.Stack {
     ): lambda.Function {
 
         // Create a Server Lambda resource
+
+        // // Create a Python Lambda
+        // // ----------------------
+        // const serverLambda: lambda.Function = new lambda.Function(this, serverLambdaId, {
+        //     functionName: CloudFormationStackUtils.getResourceName(serverLambdaId, props),
+        //     runtime: lambda.Runtime.PYTHON_3_9,
+        //     code: lambda.Code.fromAsset(resolve(__dirname, "../../lambda/src")),
+        //     // Lambda should be very fast. Something is wrong if it takes > 5 seconds.
+        //     timeout: cdk.Duration.seconds(5),
+        //     handler: "entrypoint.handler", // TODO: Move constants to a configuration file.
+        //     environment: {
+        //         // Give lambda access to the table name.
+        //         MESSAGE_TABLE_NAME: messageTable.tableName,
+        //         // Declare an environment variable that will be overwritten in local SAM
+        //         // deployments the AWS stack. SAM can only set environment variables that are
+        //         // already expected to be present in the lambda.
+        //         IS_LOCAL: "false",
+        //     }
+        // });
+
+        // Create a Rust Lambda
+        // --------------------
         const serverLambda: lambda.Function = new lambda.Function(this, serverLambdaId, {
             functionName: CloudFormationStackUtils.getResourceName(serverLambdaId, props),
-            runtime: lambda.Runtime.PYTHON_3_9,
-            code: lambda.Code.fromAsset(resolve(__dirname, "../../lambda/src")),
+            architecture: lambda.Architecture.ARM_64, // <- Will need to change when run locally for x86
+            runtime: lambda.Runtime.PROVIDED_AL2023,
+            code: lambda.Code.fromAsset(resolve(__dirname, "../../target/lambda/lambda-rs/bootstrap.zip")),
             // Lambda should be very fast. Something is wrong if it takes > 5 seconds.
-            timeout: cdk.Duration.seconds(5),
-            handler: "entrypoint.handler", // TODO: Move constants to a configuration file.
+            timeout: cdk.Duration.seconds(30),
+            handler: "main",
             environment: {
                 // Give lambda access to the table name.
                 MESSAGE_TABLE_NAME: messageTable.tableName,
