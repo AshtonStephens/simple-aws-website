@@ -9,3 +9,7 @@ env/*
 **.swp
 env/*
 **/target
+
+# Exclude individual local testing artifacts.
+docker/lambda/lambda.log
+docker/dynamodb/shared-local-instance.db

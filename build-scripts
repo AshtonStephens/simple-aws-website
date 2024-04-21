@@ -99,6 +99,8 @@ for arg in "${args[@]}"; do
         (cd website && npm run clean 1> /dev/null) &
         (cd lambda && poetry cache clear --all . 1> /dev/null) &
         (cd lambda-rs && cargo clean 1> /dev/null) &
+        # Clean the DynamoDB table from the integration tests.
+        (cd docker && rm dynamodb/shared-local-instance.db) &
         wait
 
     elif [[ $arg == "sam-start-api" ]]; then
@@ -130,6 +132,7 @@ for arg in "${args[@]}"; do
             cd cloud_formation
             cdk synth -q --no-staging > /dev/null
             sam local start-api \
+                --log-file $PWD/../docker/lambda/lambda.log \
                 --env-vars $PWD/../docker/lambda/env.json \
                 --docker-network "aws-local-vpc" \
                 -t ./cdk.out/CloudFormationStack.template.json
