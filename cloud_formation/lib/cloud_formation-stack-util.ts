@@ -139,4 +139,17 @@ export class CloudFormationStackUtils {
         return ApiDefinition.fromInline(JSON.parse(fs.readFileSync(restApiPathOrFileDescriptor, 'utf-8')
                     .replaceAll("${API_LAMBDA_URI}", lambdaUri)))
     }
+
+    /**
+    * @description Generate an api definition asset from a local OpenAPI definition, replacing the lambda
+    * integration tags with the appropriate resource values.
+    * @param {fs.PathOrFileDescriptor} restApiPathOrFileDescriptor the location of the definition asset
+    * @returns {ApiDefinition} The name of the resource.
+    */
+    public static restApiDefinition(
+        restApiPathOrFileDescriptor: fs.PathOrFileDescriptor,
+    ): ApiDefinition {
+        // Replace our `${API_LAMBDA_URI}` token with the calculated lambda invokation URI.
+        return ApiDefinition.fromInline(JSON.parse(fs.readFileSync(restApiPathOrFileDescriptor, 'utf-8')))
+    }
 }

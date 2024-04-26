@@ -116,11 +116,10 @@ export class CloudFormationStack extends cdk.Stack {
         const restApiId: string  = "MessageServerAPI";
         const restApi: apig.SpecRestApi = new apig.SpecRestApi(this, restApiId, {
             restApiName: CloudFormationStackUtils.getResourceName(restApiId, props),
-            apiDefinition: CloudFormationStackUtils.restApiDefinitionWithLambdaIntegration(
-                resolve(__dirname, "../../api_definition/MessageServerAPI.json"),
-                serverLambdaId,
-                props,
-            ),
+            apiDefinition: CloudFormationStackUtils.restApiDefinition(resolve(
+                __dirname,
+                "../../.generated-sources/smithy/openapi-specification/openapi/MessageService.openapi.json",
+            )),
             deployOptions: { stageName: props.stageName },
         });
 

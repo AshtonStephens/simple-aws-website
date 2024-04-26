@@ -89,13 +89,13 @@ class EventHandler:
                     # of messages.
                     return package_response(200, {"message_count": message_count})
 
-            if event['resource'] == "/messages/{message_id}":
+            if event['resource'] == "/messages/{messageId}":
                 if event['httpMethod'] == "GET":
 
                     # Query DynamoDB for the provided message id.
                     response = self.client.get_item(
                         TableName=self.table_name,
-                        Key={'id': {'S': event['pathParameters']['message_id']}}
+                        Key={'id': {'S': event['pathParameters']['messageId']}}
                     )
 
                     # Package the response as a message resource.

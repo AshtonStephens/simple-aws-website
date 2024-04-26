@@ -1,6 +1,7 @@
 {
   "version": "1.0",
   "sources": ["models"],
+  "outputDirectory": "../.generated-sources/smithy",
   "maven": {
     "dependencies": [
       "software.amazon.smithy:smithy-openapi:1.47.0",
@@ -12,12 +13,15 @@
     ]
   },
   "projections": {
-    "openapi-conversion": {
+    "openapi-specification": {
       "plugins": {
         "openapi": {
-          "service": "smithy.example#Weather",
+          "service": "smithy.example#MessageService",
           "protocol": "aws.protocols#restJson1",
           "version": "3.1.0"
+        },
+        "run::hello": {
+          "command": ["hello.sh", "--arg", "arg-value"]
         }
       }
     }
