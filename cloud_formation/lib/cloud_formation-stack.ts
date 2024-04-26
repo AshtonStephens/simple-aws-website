@@ -10,6 +10,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import { CloudFormationStackProps } from './cloud_formation-stack-props';
 import { CloudFormationStackUtils } from './cloud_formation-stack-util';
+import { SqsDlq } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 /**
 * @class CloudFormationStack
@@ -35,6 +36,53 @@ export class CloudFormationStack extends cdk.Stack {
 
         const websiteUser: iam.User = this.createOrUpdateWebsiteUser(messageApi, props);
         const websiteBucket: s3.Bucket = this.createOrUpdateWebsiteBucket(messageApi, props);
+
+        const demoTable: dynamodb.Table = this.createOrUpdateDemoTable(props);
+    }
+
+    /**
+     * @private
+     * @method createOrUpdateMessageTable
+     * @description Creates a DynamoDB table to store messages.
+     * @param {CloudFormationStackProps} props The stack properties.
+     * @returns {dynamodb.Table} The DynamoDB table.
+     */
+    createOrUpdateDemoTable(props: CloudFormationStackProps): dynamodb.Table {
+        // Create DynamoDB table to store the messages. Encrypted by default.
+        const tableId: string = 'DemoTable';
+        const dynamoDbTable = new dynamodb.Table(this, tableId, {
+            tableName: CloudFormationStackUtils.getResourceName(tableId, props),
+            partitionKey: {
+                name: 'txid',
+                type: dynamodb.AttributeType.STRING,
+            },
+            sortKey: {
+                name: 'outputIndex',
+                type: dynamodb.AttributeType.NUMBER,
+            },
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
+
+        dynamoDbTable.addGlobalSecondaryIndex({
+            indexName: `${tableId}-index-1`,
+            partitionKey: {
+                name: 'opStatus',
+                type: dynamodb.AttributeType.NUMBER,
+            },
+            sortKey: {
+                name: 'creationTime',
+                type: dynamodb.AttributeType.NUMBER,
+            },
+            projectionType: dynamodb.ProjectionType.INCLUDE,
+            nonKeyAttributes: [
+                "txid",
+                "outputIndex",
+                "recipient",
+                "amount"
+            ]
+        });
+
+        return dynamoDbTable;
     }
 
     /**

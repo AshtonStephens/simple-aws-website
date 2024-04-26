@@ -128,6 +128,22 @@ for arg in "${args[@]}"; do
 
     elif [[ $arg == "down" ]]; then
         sudo docker compose down --remove-orphans
+
+    elif [[ $arg == "table-test" ]]; then
+
+        (cd cloud_formation && cdk synth -q --no-staging > /dev/null) &
+        (
+            # echo "spinning down table"
+            docker compose down --remove-orphans
+            # echo "removing database"
+            rm  ./docker/dynamodb/shared-local-instance.db
+            # echo "restarting DynamoDB instance"
+            docker compose up -d
+        ) &
+        wait
+
+        echo "running 'make-tables'"
+        /Users/$USER/workplace/simple-aws-website/.venv/bin/python /Users/$USER/workplace/simple-aws-website/scripts/make-tables.py
     else
         echo "Invalid parameter"
     fi
